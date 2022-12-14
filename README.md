@@ -15,9 +15,7 @@ Or using a tag:
 
 ## Usage
 
-```python
-from mysql_object import MySQLObject
-```
+See [example.py](example.py) for a simple example.
 
 ## Tests
 

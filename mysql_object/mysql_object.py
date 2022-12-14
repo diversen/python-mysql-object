@@ -46,7 +46,7 @@ class MySQLObject:
     def rows_affected(self) -> int:
         return self.cursor.rowcount
 
-    def fetchone(self, columns='*', where: str=None, order_by=None, limit=None, placeholder_values: tuple=None) -> dict:
+    def fetchone(self, columns='*', where=None, order_by=None, limit=None, placeholder_values: tuple=None) -> dict:
         query = SQLQuery()
         
         query.select(self.get_table(), columns)
@@ -60,7 +60,7 @@ class MySQLObject:
         cursor.close()
         return result
 
-    def fetchall(self, columns='*', where: str=None, order_by=None, limit=None, placeholder_values: tuple=None) -> list:
+    def fetchall(self, columns='*', where=None, order_by=None, limit=None, placeholder_values: tuple=None) -> list:
         """ returns a list of dicts"""
         query = SQLQuery()
         
@@ -75,9 +75,10 @@ class MySQLObject:
         cursor.close()
         return result
 
-    def fetchall_query(self, query:str, placerholder_values=None) -> list:
+    def fetchall_query(self, query:str, placeholder_values=None) -> list:
         """ using just a query and values returns a list of dicts"""
-        cursor = self.execute(query, placerholder_values)
+
+        cursor = self.execute(query, placeholder_values)
         result = cursor.fetchall()
         cursor.close()
         return result
