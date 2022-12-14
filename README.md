@@ -2,7 +2,7 @@
 
 Simple Python MySQL CRUD and query tool
 
-The main usage is probably if you don't use a ORM, but query the MySQL database directly - maybe using `mysql.connector`.
+The main usage is probably if you don't use a ORM, but query the MySQL database directly using `mysql.connector`.
 
 ## Install mysql-migration
 
@@ -24,8 +24,6 @@ from mysql_object import MySQLObject
 The test uses a docker container with MySQL and a database named 'mysql_migration_test'.
     
 These are the connection parameters:
-
-
 
 ```sql
 CREATE database mysql_object;
