@@ -95,7 +95,7 @@ class TestMySQLObject(unittest.TestCase):
     def test_sql_query(self):
         
         query = SQLQuery().select("tests").where("title = %s OR title = %s").get_query()
-        self.assertEqual(query, "SELECT * FROM tests WHERE title = %s OR title = %s")
+        self.assertEqual(query, "SELECT * FROM `tests` WHERE title = %s OR title = %s")
 
         query = SQLQuery()
         query.select("tests")
@@ -104,9 +104,12 @@ class TestMySQLObject(unittest.TestCase):
         query.limit([30, 10])
         
         sql = query.get_query()
-        self.assertEqual(sql, "SELECT * FROM tests WHERE title = %s OR title = %s ORDER BY test DESC, title ASC LIMIT 30, 10")
+        self.assertEqual(sql, "SELECT * FROM `tests` WHERE title = %s OR title = %s ORDER BY test DESC, title ASC LIMIT 30, 10")
 
+        query = SQLQuery()
+        sql = query.select("tests").where("title = %s OR title = %s").order_by(['title', 'ASC']).limit([30, 10]).get_query()
 
+        self.assertEqual(sql, "SELECT * FROM `tests` WHERE title = %s OR title = %s ORDER BY title ASC LIMIT 30, 10")
 
 
 

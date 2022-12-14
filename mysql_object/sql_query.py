@@ -14,16 +14,16 @@ class SQLQuery:
 
         return columns
 
-    def select(self, table, columns='*', where=None):
+    def select(self, table, columns='*'):
 
         columns = self.columns_as_str(columns)
-        self.sql = "SELECT %s FROM %s" % (columns, table)
+        self.sql = "SELECT %s FROM `%s`" % (columns, table)
         return self
 
     def where(self, where=None):
         if not where:
             return self
-        
+
         self.sql += " WHERE %s" % where
         return self
 
@@ -31,6 +31,9 @@ class SQLQuery:
         """ columns: list of columns where a column look like e.g: ['column', 'ASC'] """
         if not column_directions:
             return self
+
+        if type(column_directions[0]) == str:
+            column_directions = [column_directions]
         
         order_by = []
         for column_direction in column_directions:
