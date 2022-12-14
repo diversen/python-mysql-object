@@ -33,15 +33,15 @@ class TestMySQLObject(unittest.TestCase):
     def test_select_one(self):
         mysql_object = get_object('tests')
         mysql_object.insert({"title": "test"})
-        result = mysql_object.fetchone(where="title = %s", values=("test",))
+        result = mysql_object.fetchone(where="title = %s", placeholder_values=("test",))
         self.assertEqual(result["title"], "test")
 
     def test_insert(self):
         mysql_object = get_object('tests')
 
-        mysql_object.delete(where="title = %s", where_values=("test",))
+        mysql_object.delete(where="title = %s", placeholder_values=("test",))
         mysql_object.insert({"title": "test"})
-        result = mysql_object.fetchone(where="title = %s", values=("test",))
+        result = mysql_object.fetchone(where="title = %s", placeholder_values=("test",))
 
         self.assertEqual(result["title"], "test")
 
@@ -49,46 +49,46 @@ class TestMySQLObject(unittest.TestCase):
         
         mysql_object = get_object("tests")
         mysql_object.insert({"title": "test"})
-        mysql_object.delete(where="title = %s", where_values=("test",))
-        result = mysql_object.fetchone(where="title = %s", values=("test",))
+        mysql_object.delete(where="title = %s", placeholder_values=("test",))
+        result = mysql_object.fetchone(where="title = %s", placeholder_values=("test",))
         self.assertIsNone(result)
 
     def test_update(self):
 
         mysql_object = get_object("tests")
-        mysql_object.insert(insert_values={"title": "test"})
-        mysql_object.update(update_values={"title": "new test"}, where="title = %s", where_values=("test",))
+        mysql_object.insert(cols_and_vals={"title": "test"})
+        mysql_object.update(cols_and_values={"title": "new test"}, where="title = %s", placeholder_values=("test",))
 
-        result = mysql_object.fetchone(where="title = %s", values=("new test",))
+        result = mysql_object.fetchone(where="title = %s", placeholder_values=("new test",))
         self.assertEqual(result["title"], "new test")
 
-        mysql_object.delete(where="title = %s", where_values=("test",))
+        mysql_object.delete(where="title = %s", placeholder_values=("test",))
 
     def test_insert_id(self):
         mysql_object = get_object("tests")
-        mysql_object.insert(insert_values={"title": "test"})
+        mysql_object.insert(cols_and_vals={"title": "test"})
         insert_id = mysql_object.insert_id()
         self.assertTrue(insert_id > 0)
 
-        mysql_object.delete(where="title = %s", where_values=("test",))
+        mysql_object.delete(where="title = %s", placeholder_values=("test",))
 
     def test_rows_affected(self):
         mysql_object = get_object("tests")
-        mysql_object.insert(insert_values={"title": "test"})
-        mysql_object.delete(where="title = %s", where_values=("test",))
+        mysql_object.insert(cols_and_vals={"title": "test"})
+        mysql_object.delete(where="title = %s", placeholder_values=("test",))
         result = mysql_object.rows_affected()
         self.assertTrue(result == 1)
 
     def test_select_one_select_all(self):
         mysql_object = get_object("tests")
-        mysql_object.delete(where="title = %s OR title= %s", where_values=("test", "test2",))
-        mysql_object.insert(insert_values={"title": "test"})
-        mysql_object.insert(insert_values={"title": "test2"})
+        mysql_object.delete(where="title = %s OR title= %s", placeholder_values=("test", "test2",))
+        mysql_object.insert(cols_and_vals={"title": "test"})
+        mysql_object.insert(cols_and_vals={"title": "test2"})
 
-        row = mysql_object.fetchone(where="title = %s", values=("test",))
+        row = mysql_object.fetchone(where="title = %s", placeholder_values=("test",))
         self.assertEqual(row["title"], "test")
         
-        rows = mysql_object.fetchall(where="title = %s OR title = %s", values=("test", "test2",))
+        rows = mysql_object.fetchall(where="title = %s OR title = %s", placeholder_values=("test", "test2",))
 
         self.assertTrue(len(rows) == 2)        
 

@@ -4,8 +4,9 @@ class SQLQuery:
     Class to make it easier to create SQL queries.
     """
 
-    def __init__(self, table = None):
+    def __init__(self, table:str = None):
         self.sql = ""
+        self.table = table
 
     def columns_as_str(self, columns):
         if type(columns) == list:
@@ -14,13 +15,13 @@ class SQLQuery:
 
         return columns
 
-    def select(self, table, columns='*'):
+    def select(self, table:str, columns='*'):
 
         columns = self.columns_as_str(columns)
         self.sql = "SELECT %s FROM `%s`" % (columns, table)
         return self
 
-    def where(self, where=None):
+    def where(self, where:str=None):
         if not where:
             return self
 
@@ -42,14 +43,14 @@ class SQLQuery:
         self.sql += " ORDER BY %s" % order_by
         return self
 
-    def limit(self, limit=None):
+    def limit(self, limit:list=None):
         if not limit:
             return self
         
         self.sql += " LIMIT %s, %s" % (limit[0], limit[1])
         return self
 
-    def insert(self, table, columns):
+    def insert(self, table:str, columns:list):
 
         columns = self.columns_as_str(columns)
         self.sql = "INSERT INTO %s (%s) VALUES " % (table, columns)
@@ -57,19 +58,19 @@ class SQLQuery:
         placeholders = []
         for _ in columns.split(", "):
             placeholders.append("%s")
+
         placeholders = ", ".join(placeholders)
         self.sql += "(%s)" % placeholders
 
         return self
 
-    def update(self, table, columns):
+    def update(self, table:str, columns:list):
 
         self.sql = "UPDATE %s SET " % table
         set_columns = []
 
         columns = self.columns_as_str(columns)
         for column in columns.split(", "):
-            # e.g. `column` = %s
             set_columns.append("%s = %%s" % column)
 
         set_columns = ", ".join(set_columns)

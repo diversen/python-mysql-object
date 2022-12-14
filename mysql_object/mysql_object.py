@@ -33,10 +33,10 @@ class MySQLObject:
 
         return self.table
 
-    def execute(self, query, values=None) -> cursor:
+    def execute(self, query, placeholder_values=None) -> cursor:
         connection = self.connection
         cursor = connection.cursor(dictionary=True, buffered=True)
-        cursor.execute(query, values)
+        cursor.execute(query, placeholder_values)
         self.cursor = cursor
         return cursor
 
@@ -46,7 +46,7 @@ class MySQLObject:
     def rows_affected(self) -> int:
         return self.cursor.rowcount
 
-    def fetchone(self, columns='*', where: str=None, order_by=None, limit=None, values: tuple=None) -> dict:
+    def fetchone(self, columns='*', where: str=None, order_by=None, limit=None, placeholder_values: tuple=None) -> dict:
         query = SQLQuery()
         
         query.select(self.get_table(), columns)
@@ -55,12 +55,12 @@ class MySQLObject:
         query.limit(limit)
         sql = query.get_query()
 
-        cursor = self.execute(sql, values)
+        cursor = self.execute(sql, placeholder_values)
         result = cursor.fetchone()
         cursor.close()
         return result
 
-    def fetchall(self, columns='*', where: str=None, order_by=None, limit=None, values: tuple=None) -> list:
+    def fetchall(self, columns='*', where: str=None, order_by=None, limit=None, placeholder_values: tuple=None) -> list:
         """ returns a list of dicts"""
         query = SQLQuery()
         
@@ -70,48 +70,48 @@ class MySQLObject:
         query.limit(limit)    
         sql = query.get_query()
 
-        cursor = self.execute(sql, values)
+        cursor = self.execute(sql, placeholder_values)
         result = cursor.fetchall()
         cursor.close()
         return result
 
-    def fetchall_query(self, query, values=None) -> list:
+    def fetchall_query(self, query:str, placerholder_values=None) -> list:
         """ using just a query and values returns a list of dicts"""
-        cursor = self.execute(query, values)
+        cursor = self.execute(query, placerholder_values)
         result = cursor.fetchall()
         cursor.close()
         return result
 
-    def fetchone_query(self, query, values=None) -> dict:
+    def fetchone_query(self, query:str, placeholder_values=None) -> dict:
         """ using just a query and values returns a single dict"""
-        cursor = self.execute(query, values)
+        cursor = self.execute(query, placeholder_values)
         result = cursor.fetchone()
         cursor.close()
         return result
 
-    def insert(self, insert_values: dict) -> None:
+    def insert(self, cols_and_vals: dict) -> None:
 
         table = self.get_table()
-        keys, insert_values = SQLQuery.get_columns_and_values(insert_values)
-        insert_sql = SQLQuery().insert(table, keys).get_query()
+        columns, values = SQLQuery.get_columns_and_values(cols_and_vals)
+        insert_sql = SQLQuery().insert(table, columns).get_query()
 
-        self.execute(insert_sql, insert_values)
+        self.execute(insert_sql, values)
         self.connection.commit()
 
-    def update(self, update_values: dict, where: str, where_values: tuple = None) -> None:
+    def update(self, cols_and_values: dict, where: str, placeholder_values:tuple = None) -> None:
         table = self.get_table()
-        columns, update_values = SQLQuery.get_columns_and_values(update_values)
+        columns, cols_and_values = SQLQuery.get_columns_and_values(cols_and_values)
 
         update_sql = SQLQuery().update(table, columns).where(where).get_query()
-        update_values = update_values + where_values
+        cols_and_values = cols_and_values + placeholder_values
 
-        self.execute(update_sql, update_values)
+        self.execute(update_sql, cols_and_values)
         self.connection.commit()
 
-    def delete(self, where, where_values) -> None:
+    def delete(self, where:str, placeholder_values:tuple) -> None:
         table = self.get_table()
         delete_sql = SQLQuery().delete(table).where(where).get_query()
-        self.execute(delete_sql, where_values)
+        self.execute(delete_sql, placeholder_values)
         self.connection.commit()
 
 
