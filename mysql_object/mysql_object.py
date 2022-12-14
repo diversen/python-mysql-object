@@ -47,18 +47,40 @@ class MySQLObject:
     def rows_affected(self) -> int:
         return self.cursor.rowcount
 
-    def fetchone(self, columns='*', where: str = None, values: tuple = None) -> dict:
+    def fetchone(self, columns='*', where: str=None, order_by=None, limit=None, values: tuple=None) -> dict:
         query = SQLQuery()
-        sql = query.select(self.get_table(), columns).where(where).get_query()
+        query.select(self.get_table(), columns)
+
+        if where:
+            query.where(where)
+            
+        if order_by:
+            query.order_by(order_by)
+
+        if limit:
+            query.limit(limit)
+
+        sql = query.get_query()
         cursor = self.execute(sql, values)
         result = cursor.fetchone()
         cursor.close()
         return result
 
-    def fetchall(self, columns='*', where: str=None, values: tuple=None) -> list:
+    def fetchall(self, columns='*', where: str=None, order_by=None, limit=None, values: tuple=None) -> list:
         """ returns a list of dicts"""
         query = SQLQuery()
-        sql = query.select(self.get_table(), columns).where(where).get_query()
+        query.select(self.get_table(), columns)
+        
+        if where:
+            query.where(where)
+            
+        if order_by:
+            query.order_by(order_by)
+
+        if limit:
+            query.limit(limit)
+            
+        sql = query.get_query()
         cursor = self.execute(sql, values)
         result = cursor.fetchall()
         cursor.close()
@@ -77,13 +99,13 @@ class MySQLObject:
         cursor.close()
         return result
 
-    def insert(self, values: dict) -> None:
+    def insert(self, insert_values: dict) -> None:
 
         table = self.get_table()
-        keys, values = SQLQuery.get_columns_and_values(values)
+        keys, insert_values = SQLQuery.get_columns_and_values(insert_values)
         insert_sql = SQLQuery().insert(table, keys).get_query()
 
-        self.execute(insert_sql, values)
+        self.execute(insert_sql, insert_values)
         self.connection.commit()
 
     def update(self, update_values: dict, where: str, where_values: tuple = None) -> None:
@@ -96,10 +118,10 @@ class MySQLObject:
         self.execute(update_sql, update_values)
         self.connection.commit()
 
-    def delete(self, where, where_variables) -> None:
+    def delete(self, where, where_values) -> None:
         table = self.get_table()
         delete_sql = SQLQuery().delete(table).where(where).get_query()
-        self.execute(delete_sql, where_variables)
+        self.execute(delete_sql, where_values)
         self.connection.commit()
 
 

@@ -4,7 +4,7 @@ class SQLQuery:
     Class to make it easier to create SQL queries.
     """
 
-    def __init__(self):
+    def __init__(self, table = None):
         self.sql = ""
 
     def columns_as_str(self, columns):
@@ -24,7 +24,7 @@ class SQLQuery:
         self.sql += " WHERE %s" % where
         return self
 
-    def order_by(self, column_directions):
+    def order_by(self, column_directions:list):
         """ columns: list of columns where a column look like e.g: ['column', 'ASC'] """
         order_by = []
         for column_direction in column_directions:
