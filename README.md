@@ -15,7 +15,7 @@ Or using a tag:
 
 ## Usage
 
-See [example.py](example.py) for a simple example.
+See [EXAMPLE.py](EXAMPLE.py) for a simple example.
 
 ## Tests
 
