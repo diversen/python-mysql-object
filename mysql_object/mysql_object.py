@@ -1,7 +1,6 @@
 from mysql.connector import connect, cursor, Error
 from mysql_object.sql_query import SQLQuery
 
-
 class MySQLObject:
 
     def __init__(self, host, user, password, database):
@@ -49,18 +48,13 @@ class MySQLObject:
 
     def fetchone(self, columns='*', where: str=None, order_by=None, limit=None, values: tuple=None) -> dict:
         query = SQLQuery()
+        
         query.select(self.get_table(), columns)
-
-        if where:
-            query.where(where)
-            
-        if order_by:
-            query.order_by(order_by)
-
-        if limit:
-            query.limit(limit)
-
+        query.where(where)
+        query.order_by(order_by)
+        query.limit(limit)
         sql = query.get_query()
+
         cursor = self.execute(sql, values)
         result = cursor.fetchone()
         cursor.close()
@@ -69,31 +63,27 @@ class MySQLObject:
     def fetchall(self, columns='*', where: str=None, order_by=None, limit=None, values: tuple=None) -> list:
         """ returns a list of dicts"""
         query = SQLQuery()
-        query.select(self.get_table(), columns)
         
-        if where:
-            query.where(where)
-            
-        if order_by:
-            query.order_by(order_by)
-
-        if limit:
-            query.limit(limit)
-            
+        query.select(self.get_table(), columns)
+        query.where(where)    
+        query.order_by(order_by)
+        query.limit(limit)    
         sql = query.get_query()
+
         cursor = self.execute(sql, values)
         result = cursor.fetchall()
         cursor.close()
         return result
 
     def fetchall_query(self, query, values=None) -> list:
-        """ returns a list of dicts"""
+        """ using just a query and values returns a list of dicts"""
         cursor = self.execute(query, values)
         result = cursor.fetchall()
         cursor.close()
         return result
 
     def fetchone_query(self, query, values=None) -> dict:
+        """ using just a query and values returns a single dict"""
         cursor = self.execute(query, values)
         result = cursor.fetchone()
         cursor.close()

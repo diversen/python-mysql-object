@@ -20,12 +20,18 @@ class SQLQuery:
         self.sql = "SELECT %s FROM %s" % (columns, table)
         return self
 
-    def where(self, where):
+    def where(self, where=None):
+        if not where:
+            return self
+        
         self.sql += " WHERE %s" % where
         return self
 
-    def order_by(self, column_directions:list):
+    def order_by(self, column_directions:list=None):
         """ columns: list of columns where a column look like e.g: ['column', 'ASC'] """
+        if not column_directions:
+            return self
+        
         order_by = []
         for column_direction in column_directions:
             order_by.append("%s %s" % (column_direction[0], column_direction[1],))
@@ -33,7 +39,10 @@ class SQLQuery:
         self.sql += " ORDER BY %s" % order_by
         return self
 
-    def limit(self, limit):
+    def limit(self, limit=None):
+        if not limit:
+            return self
+        
         self.sql += " LIMIT %s, %s" % (limit[0], limit[1])
         return self
 
@@ -53,7 +62,6 @@ class SQLQuery:
     def update(self, table, columns):
 
         self.sql = "UPDATE %s SET " % table
-
         set_columns = []
 
         columns = self.columns_as_str(columns)
@@ -71,9 +79,7 @@ class SQLQuery:
     def delete(self, table, where=None):
 
         self.sql = "DELETE FROM %s" % table
-
-        if where:
-            self.where(where)
+        self.where(where)
 
         return self
 
