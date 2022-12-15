@@ -136,15 +136,15 @@ class MySQLObject:
         self.execute(insert_sql, values_tuple)
         self.connection.commit()
 
-    # def update(self, values: dict, where: str, placeholder_values:tuple = None) -> None:
-    #     table = self.get_table()
-    #     columns, values = SQLQuery.get_columns_and_values(values)
+    def update(self, values: dict, where: str, placeholder_values:tuple = None) -> None:
+        table = self.get_table()
+        columns, values = SQLQuery.get_columns_and_values(values)
 
-    #     update_sql = SQLQuery().update(table, columns).where(where).get_query()
-    #     values = values + placeholder_values
+        update_sql = SQLQuery().update(table, columns).where(where).get_query()
+        values = values + placeholder_values
 
-    #     self.execute(update_sql, values)
-    #     self.connection.commit()
+        self.execute(update_sql, values)
+        self.connection.commit()
 
     def update_simple(self, values: dict, where: dict) -> None:
         """ update_simple uses a 'where' argument containing a dict of columns and values
