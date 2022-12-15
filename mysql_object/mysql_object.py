@@ -60,6 +60,26 @@ class MySQLObject:
         cursor.close()
         return result
 
+
+    def fetchone_simple(self, columns='*', where=None, order_by=None, limit=None) -> dict:
+        """ fetchone_simple uses a 'where' argument containing a dict of columns and values
+        and returns a single dict
+        """
+        query = SQLQuery()
+        
+        query.select(self.get_table(), columns)
+        query.where_simple(where)
+        query.order_by(order_by)
+        query.limit(limit)
+        sql = query.get_query()
+
+        cursor = self.execute(sql, query.placeholder_values)
+        result = cursor.fetchone()
+        cursor.close()
+        return result
+
+        
+
     def fetchall(self, columns='*', where=None, order_by=None, limit=None, placeholder_values: tuple=None) -> list:
         """ returns a list of dicts"""
         query = SQLQuery()
@@ -71,6 +91,23 @@ class MySQLObject:
         sql = query.get_query()
 
         cursor = self.execute(sql, placeholder_values)
+        result = cursor.fetchall()
+        cursor.close()
+        return result
+
+    def fetchall_simple(self, columns='*', where=None, order_by=None, limit=None) -> list:
+        """ fetchall_simple uses a 'where' argument containing a dict of columns and values
+        and returns a list of dicts
+        """
+        query = SQLQuery()
+        
+        query.select(self.get_table(), columns)
+        query.where_simple(where)
+        query.order_by(order_by)
+        query.limit(limit)
+        sql = query.get_query()
+
+        cursor = self.execute(sql, query.get_placeholder_values())
         result = cursor.fetchall()
         cursor.close()
         return result
@@ -90,23 +127,37 @@ class MySQLObject:
         cursor.close()
         return result
 
-    def insert(self, cols_and_vals: dict) -> None:
+    def insert(self, values: dict) -> None:
 
         table = self.get_table()
-        columns, values = SQLQuery.get_columns_and_values(cols_and_vals)
+        columns, values_tuple = SQLQuery.get_columns_and_values(values)
         insert_sql = SQLQuery().insert(table, columns).get_query()
 
-        self.execute(insert_sql, values)
+        self.execute(insert_sql, values_tuple)
         self.connection.commit()
 
-    def update(self, cols_and_values: dict, where: str, placeholder_values:tuple = None) -> None:
+    # def update(self, values: dict, where: str, placeholder_values:tuple = None) -> None:
+    #     table = self.get_table()
+    #     columns, values = SQLQuery.get_columns_and_values(values)
+
+    #     update_sql = SQLQuery().update(table, columns).where(where).get_query()
+    #     values = values + placeholder_values
+
+    #     self.execute(update_sql, values)
+    #     self.connection.commit()
+
+    def update_simple(self, values: dict, where: dict) -> None:
+        """ update_simple uses a 'where' argument containing a dict of columns and values
+        """
+
         table = self.get_table()
-        columns, cols_and_values = SQLQuery.get_columns_and_values(cols_and_values)
 
-        update_sql = SQLQuery().update(table, columns).where(where).get_query()
-        cols_and_values = cols_and_values + placeholder_values
+        query = SQLQuery()
+        query.update_simple(table, values=values, where=where)
+        update_sql = query.get_query()
+        placeholder_values = query.get_placeholder_values()
 
-        self.execute(update_sql, cols_and_values)
+        self.execute(update_sql, placeholder_values)
         self.connection.commit()
 
     def delete(self, where:str, placeholder_values:tuple) -> None:
@@ -115,6 +166,13 @@ class MySQLObject:
         self.execute(delete_sql, placeholder_values)
         self.connection.commit()
 
+    def delete_simple(self, where:dict) -> None:
+        table = self.get_table()
+        query = SQLQuery()
+        delete_sql = query.delete(table).where_simple(where).get_query()        
+        placeholder_values = query.get_placeholder_values()
+        self.execute(delete_sql, placeholder_values)
+        self.connection.commit()
 
 def get_mysql_object(*kargs, **kwargs) -> MySQLObject:
     """Returns a MySQLObject instance"""

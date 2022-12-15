@@ -4,9 +4,12 @@ class SQLQuery:
     Class to make it easier to create SQL queries.
     """
 
-    def __init__(self, table:str = None):
+    def __init__(self, table: str = None):
         self.sql = ""
         self.table = table
+
+        # List of values to use with placeholders, extracted from a dict
+        self.placeholder_values = None
 
     def columns_as_str(self, columns):
         if type(columns) == list:
@@ -15,42 +18,59 @@ class SQLQuery:
 
         return columns
 
-    def select(self, table:str, columns='*'):
+    def select(self, table: str, columns='*'):
 
         columns = self.columns_as_str(columns)
         self.sql = "SELECT %s FROM `%s`" % (columns, table)
         return self
 
-    def where(self, where:str=None):
+    def where(self, where: str = None):
         if not where:
             return self
 
         self.sql += " WHERE %s" % where
         return self
 
-    def order_by(self, column_directions:list=None):
+    def where_simple(self, where: dict = None):
+        """ where: dict of columns and values """
+        if not where:
+            return self
+
+        columns, values = self.get_columns_and_values(where)
+        self.placeholder_values = values
+
+        where = []
+        for column in columns:
+            where.append("%s = %%s" % column)
+
+        where = " AND ".join(where)
+        self.sql += " WHERE %s" % where
+        return self
+
+    def order_by(self, column_directions: list = None):
         """ columns: list of columns where a column look like e.g: ['column', 'ASC'] """
         if not column_directions:
             return self
 
         if type(column_directions[0]) == str:
             column_directions = [column_directions]
-        
+
         order_by = []
         for column_direction in column_directions:
-            order_by.append("%s %s" % (column_direction[0], column_direction[1],))
+            order_by.append("%s %s" %
+                            (column_direction[0], column_direction[1],))
         order_by = ", ".join(order_by)
         self.sql += " ORDER BY %s" % order_by
         return self
 
-    def limit(self, limit:list=None):
+    def limit(self, limit: list = None):
         if not limit:
             return self
-        
+
         self.sql += " LIMIT %s, %s" % (limit[0], limit[1])
         return self
 
-    def insert(self, table:str, columns:list):
+    def insert(self, table: str, columns: list):
 
         columns = self.columns_as_str(columns)
         self.sql = "INSERT INTO %s (%s) VALUES " % (table, columns)
@@ -64,7 +84,7 @@ class SQLQuery:
 
         return self
 
-    def update(self, table:str, columns:list):
+    def update(self, table: str, columns: list):
 
         self.sql = "UPDATE %s SET " % table
         set_columns = []
@@ -76,9 +96,16 @@ class SQLQuery:
         set_columns = ", ".join(set_columns)
 
         self.sql += set_columns
+        return self
 
+    def update_simple(self, table: str, values: dict, where: dict = None):
+
+        self.update(table, list(values.keys()))
+        self.where_simple(where)
+        self.placeholder_values = tuple(values.values()) + self.get_placeholder_values()
 
         return self
+        
 
     def delete(self, table, where=None):
 
@@ -91,6 +118,11 @@ class SQLQuery:
         sql = self.sql
         self.sql = ""
         return sql
+
+    def get_placeholder_values(self):
+        values = self.placeholder_values
+        self.placeholder_values = None
+        return values
 
     # make static method
     @staticmethod

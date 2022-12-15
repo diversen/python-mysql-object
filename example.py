@@ -16,33 +16,28 @@ def get_db_table_object(table) -> MySQLObject:
 
 mysql_object = get_db_table_object("tests")
 
-# Insert
+
 mysql_object.insert({"title": "test"})
-
-# Affected rows
 print(mysql_object.rows_affected(), "rows affected")
-
-# Insert ID
 print(mysql_object.insert_id(), "last insert id")
 
-# fetchone
 row = mysql_object.fetchone(where="title = %s", placeholder_values=("test",))
 if row:
     print(row, "fetchone")
 
-mysql_object.insert({"title": "test 2"})
+row = mysql_object.fetchone_simple(where={"title": "test"})
+if row:
+    print(row, "fetchone_simple")
 
-# fetchall
+mysql_object.insert({"title": "test 2"})
 rows = mysql_object.fetchall(where="title = %s", placeholder_values=("test",))
 print(rows, "fetchall",)
 
-# update
-mysql_object.update(cols_and_values={"title": "new test"}, where="title = %s", placeholder_values=("test",))
-print(mysql_object.rows_affected(), "rows affected")
+rows = mysql_object.fetchall_simple(where={"title": "test"})
+print(rows, "fetchall_simple",)
 
-# fetchall
-rows = mysql_object.fetchall(where="title = %s OR title = %s", placeholder_values=("new test", "test 2",))
-print("fetchall", rows)
+# Update using a dict of values and a dict of where clause
+mysql_object.update_simple(values={"title": "new test"}, where={"title": "test"})
 
 # Make a custom SQL query
 query = SQLQuery()
@@ -55,15 +50,7 @@ query.limit([0, 2])
 query = query.get_query()
 print("query", query)
 
-# Get all rows using the query
-rows = mysql_object.fetchall_query(query, placeholder_values=("new test",))
-print("fetchall_query", rows)
+mysql_object.fetchall_query(query, placeholder_values=("test",))
 
-# Get one row usng the query
-row = mysql_object.fetchone_query(query, placeholder_values=("new test",))
-print("fetchone_query", row)
-
-# delete both rows
-mysql_object.delete(where="title = %s OR title = %s", placeholder_values=("new test", "test 2",))
-
-
+mysql_object.delete_simple(where={"title": "new test"})
+mysql_object.delete_simple(where={"title": "test 2"})
