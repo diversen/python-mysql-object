@@ -10,7 +10,7 @@ The main usage is probably if you don't use a ORM, but query the MySQL database 
 
 Or using a tag:
 
-    pip install git+https://github.com/diversen/python-mysql-object@v0.0.2
+    pip install git+https://github.com/diversen/python-mysql-object@v0.0.3
 
 
 ## Usage
