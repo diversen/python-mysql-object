@@ -1,6 +1,7 @@
 from mysql.connector import connect, cursor, Error
 from mysql_object.sql_query import SQLQuery
 
+
 class MySQLObject:
 
     def __init__(self, host, user, password, database):
@@ -46,9 +47,9 @@ class MySQLObject:
     def rows_affected(self) -> int:
         return self.cursor.rowcount
 
-    def fetchone(self, columns='*', where=None, order_by=None, limit=None, placeholder_values: tuple=None) -> dict:
+    def fetchone(self, columns='*', where=None, order_by=None, limit=None, placeholder_values: tuple = None) -> dict:
         query = SQLQuery()
-        
+
         query.select(self.get_table(), columns)
         query.where(where)
         query.order_by(order_by)
@@ -60,13 +61,12 @@ class MySQLObject:
         cursor.close()
         return result
 
-
     def fetchone_simple(self, columns='*', where=None, order_by=None, limit=None) -> dict:
         """ fetchone_simple uses a 'where' argument containing a dict of columns and values
         and returns a single dict
         """
         query = SQLQuery()
-        
+
         query.select(self.get_table(), columns)
         query.where_simple(where)
         query.order_by(order_by)
@@ -78,16 +78,14 @@ class MySQLObject:
         cursor.close()
         return result
 
-        
-
-    def fetchall(self, columns='*', where=None, order_by=None, limit=None, placeholder_values: tuple=None) -> list:
+    def fetchall(self, columns='*', where=None, order_by=None, limit=None, placeholder_values: tuple = None) -> list:
         """ returns a list of dicts"""
         query = SQLQuery()
-        
+
         query.select(self.get_table(), columns)
-        query.where(where)    
+        query.where(where)
         query.order_by(order_by)
-        query.limit(limit)    
+        query.limit(limit)
         sql = query.get_query()
 
         cursor = self.execute(sql, placeholder_values)
@@ -100,7 +98,7 @@ class MySQLObject:
         and returns a list of dicts
         """
         query = SQLQuery()
-        
+
         query.select(self.get_table(), columns)
         query.where_simple(where)
         query.order_by(order_by)
@@ -112,7 +110,7 @@ class MySQLObject:
         cursor.close()
         return result
 
-    def fetchall_query(self, query:str, placeholder_values=None) -> list:
+    def fetchall_query(self, query: str, placeholder_values=None) -> list:
         """ using just a query and values returns a list of dicts"""
 
         cursor = self.execute(query, placeholder_values)
@@ -120,7 +118,7 @@ class MySQLObject:
         cursor.close()
         return result
 
-    def fetchone_query(self, query:str, placeholder_values=None) -> dict:
+    def fetchone_query(self, query: str, placeholder_values=None) -> dict:
         """ using just a query and values returns a single dict"""
         cursor = self.execute(query, placeholder_values)
         result = cursor.fetchone()
@@ -131,14 +129,14 @@ class MySQLObject:
 
         table = self.get_table()
 
-        query = SQLQuery()        
+        query = SQLQuery()
         insert_sql = query.insert(table, values).get_query()
         values = query.get_placeholder_values()
 
         self.execute(insert_sql, values)
         self.connection.commit()
 
-    def update(self, values: dict, where: str, placeholder_values:tuple = None) -> None:
+    def update(self, values: dict, where: str, placeholder_values: tuple = None) -> None:
         table = self.get_table()
 
         query = SQLQuery()
@@ -149,9 +147,10 @@ class MySQLObject:
         self.connection.commit()
 
     def update_simple(self, values: dict, where: dict) -> None:
-        """ update_simple uses a 'where' argument containing a dict of columns and values
+        """ 
+        update_simple uses a 'where' argument containing a dict of columns and values
         """
-
+        
         table = self.get_table()
 
         query = SQLQuery()
@@ -162,19 +161,29 @@ class MySQLObject:
         self.execute(update_sql, placeholder_values)
         self.connection.commit()
 
-    def delete(self, where:str, placeholder_values:tuple) -> None:
+    def replace(self, values: dict, where: dict) -> None:
+        
+
+        row = self.fetchone_simple(where=where)
+        if row:
+            self.update_simple(values, where)
+        else:
+            self.insert(values)
+
+    def delete(self, where: str, placeholder_values: tuple) -> None:
         table = self.get_table()
         delete_sql = SQLQuery().delete(table).where(where).get_query()
         self.execute(delete_sql, placeholder_values)
         self.connection.commit()
 
-    def delete_simple(self, where:dict) -> None:
+    def delete_simple(self, where: dict) -> None:
         table = self.get_table()
         query = SQLQuery()
-        delete_sql = query.delete(table).where_simple(where).get_query()        
+        delete_sql = query.delete(table).where_simple(where).get_query()
         placeholder_values = query.get_placeholder_values()
         self.execute(delete_sql, placeholder_values)
         self.connection.commit()
+
 
 def get_mysql_object(*kargs, **kwargs) -> MySQLObject:
     """Returns a MySQLObject instance"""

@@ -39,6 +39,9 @@ print(rows, "fetchall_simple",)
 # Update using a dict of values and a dict of where clause
 mysql_object.update_simple(values={"title": "new test"}, where={"title": "test"})
 
+# Update values if they are found in where, otherwise insert new values
+mysql_object.replace(values={"title": "new test"}, where={"title": "test"})
+
 # Make a custom SQL query
 query = SQLQuery()
 query.select("tests")

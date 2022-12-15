@@ -142,6 +142,34 @@ class TestMySQLObject(unittest.TestCase):
 
         self.assertTrue(len(rows) == 2)
 
+    def test_replace(self):
+        mysql_object = get_object("tests")
+
+        mysql_object.delete_simple(where={"title": "replace test updated"})
+        mysql_object.delete_simple(where={"title": "replace test inserted"})
+
+        mysql_object.insert(values={"title": "replace test"})
+        mysql_object.insert(values={"title": "replace test"})
+
+        mysql_object.replace(values={"title": "replace test updated"}, where={"title":  "replace test"})
+        self.assertEqual(mysql_object.rows_affected(), 2)
+
+        rows = mysql_object.fetchall_simple(where={"title": "replace test updated"})
+        self.assertEqual(len(rows), 2)
+
+        rows = mysql_object.fetchall_simple(where={"title": "replace test"})
+        self.assertEqual(len(rows), 0)
+
+        mysql_object.replace(values={"title": "replace test inserted"}, where={"title":  "replace test"})
+        self.assertEqual(mysql_object.rows_affected(), 1)
+
+        rows = mysql_object.fetchall_simple(where={"title": "replace test inserted"})
+        self.assertEqual(len(rows), 1)
+
+        
+
+
+
     def test_sql_query(self):
 
         query = SQLQuery().select("tests").where(
