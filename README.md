@@ -15,7 +15,7 @@ Or using a tag:
 
 ## Usage
 
-See [example.py](example.py) for a simple example.
+See [example.py](example.py) for an example.
 
 ## Tests
 
@@ -44,4 +44,4 @@ To run the tests:
 
 ## License
 
-[MIT](LICENSE)# python-mysql-object
+[MIT](LICENSE)
