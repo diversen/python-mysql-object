@@ -111,7 +111,6 @@ class SQLQuery:
         self.where_simple(where)
 
         return self
-        
 
     def delete(self, table, where=None):
 

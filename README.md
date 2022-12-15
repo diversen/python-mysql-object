@@ -8,9 +8,9 @@ The main usage is probably if you don't use a ORM, but query the MySQL database 
 
     pip install git+https://github.com/diversen/python-mysql-object
 
-Or using a tag:
+Or using a tag (latest):
 
-    pip install git+https://github.com/diversen/python-mysql-object@v0.0.3
+    pip install git+https://github.com/diversen/python-mysql-object@v0.0.4
 
 
 ## Usage
