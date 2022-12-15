@@ -122,7 +122,6 @@ class SQLQuery:
     def get_query(self):
         sql = self.sql
         self.sql = ""
-        print(sql)
         return sql
 
     def get_placeholder_values(self):
