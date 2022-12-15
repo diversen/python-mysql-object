@@ -7,8 +7,6 @@ class SQLQuery:
     def __init__(self, table: str = None):
         self.sql = ""
         self.table = table
-
-        # List of values to use with placeholders, extracted from a dict
         self.placeholder_values = None
 
     def columns_as_str(self, columns):
@@ -37,7 +35,7 @@ class SQLQuery:
             return self
 
         columns, values = self.get_columns_and_values(where)
-        self.placeholder_values = values
+        self.append_placeholder_values(values)
 
         where = []
         for column in columns:
@@ -70,7 +68,10 @@ class SQLQuery:
         self.sql += " LIMIT %s, %s" % (limit[0], limit[1])
         return self
 
-    def insert(self, table: str, columns: list):
+    def insert(self, table: str, values: dict):
+
+        columns, values = self.get_columns_and_values(values)
+        self.append_placeholder_values(values)
 
         columns = self.columns_as_str(columns)
         self.sql = "INSERT INTO %s (%s) VALUES " % (table, columns)
@@ -84,25 +85,26 @@ class SQLQuery:
 
         return self
 
-    def update(self, table: str, columns: list):
+    def update(self, table: str, values: dict):
 
         self.sql = "UPDATE %s SET " % table
         set_columns = []
 
-        columns = self.columns_as_str(columns)
-        for column in columns.split(", "):
+        columns, values = self.get_columns_and_values(values)
+        self.append_placeholder_values(values)
+
+        for column in columns:
             set_columns.append("%s = %%s" % column)
 
         set_columns = ", ".join(set_columns)
-
         self.sql += set_columns
         return self
 
+
     def update_simple(self, table: str, values: dict, where: dict = None):
 
-        self.update(table, list(values.keys()))
+        self.update(table, values)
         self.where_simple(where)
-        self.placeholder_values = tuple(values.values()) + self.get_placeholder_values()
 
         return self
         
@@ -124,28 +126,19 @@ class SQLQuery:
         self.placeholder_values = None
         return values
 
-    # make static method
-    @staticmethod
-    def get_columns_and_values(dict, keys_filter=None):
+    def append_placeholder_values(self, values):
+        if self.placeholder_values:
+            self.placeholder_values = self.placeholder_values + values
+        else:
+            self.placeholder_values = values
+    
+    def get_columns_and_values(self, dict):
         """ 
         Returns keys as a list and values as a tuple from a dictionary
         This is easy to use with sql queries
         """
 
-        # only include keys that are in keys_filter
-        if keys_filter:
-            for key in list(dict.keys()):
-                if key not in keys_filter:
-                    dict.pop(key, None)
-
-        keys = list(dict.keys())
-
-        if keys_filter:
-            keys.sort(key=keys_filter.index)
-
+        columns = list(dict.keys())
         values = tuple(dict.values())
 
-        if keys_filter:
-            values = tuple(dict[key] for key in keys)
-
-        return keys, values
+        return columns, values

@@ -130,18 +130,20 @@ class MySQLObject:
     def insert(self, values: dict) -> None:
 
         table = self.get_table()
-        columns, values_tuple = SQLQuery.get_columns_and_values(values)
-        insert_sql = SQLQuery().insert(table, columns).get_query()
 
-        self.execute(insert_sql, values_tuple)
+        query = SQLQuery()        
+        insert_sql = query.insert(table, values).get_query()
+        values = query.get_placeholder_values()
+
+        self.execute(insert_sql, values)
         self.connection.commit()
 
     def update(self, values: dict, where: str, placeholder_values:tuple = None) -> None:
         table = self.get_table()
-        columns, values = SQLQuery.get_columns_and_values(values)
 
-        update_sql = SQLQuery().update(table, columns).where(where).get_query()
-        values = values + placeholder_values
+        query = SQLQuery()
+        update_sql = query.update(table, values).where(where).get_query()
+        values = query.get_placeholder_values() + placeholder_values
 
         self.execute(update_sql, values)
         self.connection.commit()
