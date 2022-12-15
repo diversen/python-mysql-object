@@ -185,14 +185,14 @@ class TestMySQLObject(unittest.TestCase):
 
         sql = query.get_query()
         self.assertEqual(
-            sql, "SELECT * FROM `tests` WHERE title = %s OR title = %s ORDER BY test DESC, title ASC LIMIT 30, 10")
+            sql, "SELECT * FROM `tests` WHERE title = %s OR title = %s ORDER BY `test` DESC, `title` ASC LIMIT 30, 10")
 
         query = SQLQuery()
         sql = query.select("tests").where("title = %s OR title = %s").order_by(
             ['title', 'ASC']).limit([30, 10]).get_query()
 
         self.assertEqual(
-            sql, "SELECT * FROM `tests` WHERE title = %s OR title = %s ORDER BY title ASC LIMIT 30, 10")
+            sql, "SELECT * FROM `tests` WHERE title = %s OR title = %s ORDER BY `title` ASC LIMIT 30, 10")
 
 
 if __name__ == '__main__':

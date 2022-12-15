@@ -39,7 +39,7 @@ class SQLQuery:
 
         where = []
         for column in columns:
-            where.append("%s = %%s" % column)
+            where.append("`%s` = %%s" % column)
 
         where = " AND ".join(where)
         self.sql += " WHERE %s" % where
@@ -55,8 +55,12 @@ class SQLQuery:
 
         order_by = []
         for column_direction in column_directions:
-            order_by.append("%s %s" %
-                            (column_direction[0], column_direction[1],))
+            
+            table = column_direction[0]
+            table = "`%s`" % table
+            direction = column_direction[1]
+            
+            order_by.append("%s %s" % (table, direction,))
         order_by = ", ".join(order_by)
         self.sql += " ORDER BY %s" % order_by
         return self
@@ -74,7 +78,7 @@ class SQLQuery:
         self.append_placeholder_values(values)
 
         columns = self.columns_as_str(columns)
-        self.sql = "INSERT INTO %s (%s) VALUES " % (table, columns)
+        self.sql = "INSERT INTO `%s` (%s) VALUES " % (table, columns)
 
         placeholders = []
         for _ in columns.split(", "):
@@ -94,7 +98,7 @@ class SQLQuery:
         self.append_placeholder_values(values)
 
         for column in columns:
-            set_columns.append("%s = %%s" % column)
+            set_columns.append("`%s` = %%s" % column)
 
         set_columns = ", ".join(set_columns)
         self.sql += set_columns
@@ -111,7 +115,7 @@ class SQLQuery:
 
     def delete(self, table, where=None):
 
-        self.sql = "DELETE FROM %s" % table
+        self.sql = "DELETE FROM `%s`" % table
         self.where(where)
 
         return self
@@ -119,6 +123,7 @@ class SQLQuery:
     def get_query(self):
         sql = self.sql
         self.sql = ""
+        print(sql)
         return sql
 
     def get_placeholder_values(self):
