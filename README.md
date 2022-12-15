@@ -4,7 +4,7 @@ Simple Python MySQL CRUD and query tool
 
 The main usage is probably if you don't use a ORM, but query the MySQL database directly using `mysql.connector`.
 
-## Install mysql-migration
+## Install python-mysql-object
 
     pip install git+https://github.com/diversen/python-mysql-object
 
@@ -19,9 +19,13 @@ See [example.py](example.py) for an example.
 
 ## Tests
 
-The test uses a docker container with MySQL and a database named 'mysql_migration_test'.
-    
-These are the connection parameters:
+The test uses a docker container with MySQL and a database named 'mysql_object'.
+
+No mocking.
+
+These are [the connection parameters](tests/settings.py):
+
+The following SQL creates the database and the test table:
 
 ```sql
 CREATE database mysql_object;
