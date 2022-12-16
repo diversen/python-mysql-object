@@ -4,23 +4,13 @@ from mysql_object.sql_query import SQLQuery
 
 class MySQLObject:
 
-    def __init__(self, host, user, password, database):
-
-        self.host = host
-        self.user = user
-        self.password = password
-        self.database = database
-        self.connection = self.get_connection()
+    def __init__(self, *kargs, **kwargs):
+        self.connection = self.get_connection(*kargs, **kwargs)
         self.cursor = None
+        self.auto_commit = True
 
-    def get_connection(self) -> connect:
-
-        return connect(
-            host=self.host,
-            user=self.user,
-            password=self.password,
-            database=self.database
-        )
+    def get_connection(self, *kargs, **kwargs) -> connect:
+        return connect(*kargs, **kwargs)
 
     def close(self) -> None:
         self.connection.close()
@@ -41,11 +31,46 @@ class MySQLObject:
         self.cursor = cursor
         return cursor
 
+    def execute_commit(self, query, placeholder_values=None) -> cursor:
+        cursor = self.execute(query, placeholder_values)
+
+        if self.auto_commit == True:
+            self.connection.commit()
+
+        return cursor
+
     def insert_id(self) -> int:
         return self.cursor.lastrowid
 
     def rows_affected(self) -> int:
         return self.cursor.rowcount
+
+    def in_transaction_execute(self, func):
+        """ 
+        Used for transactions. Return the result of the function passed in if success.
+         """
+        try:
+            # Disable auto commit internally.
+            self.auto_commit = False
+            res = func()
+            self.connection.commit()
+            self.auto_commit = True
+            return res
+        except Error as e:
+            self.connection.rollback()
+            self.auto_commit = True 
+            raise e
+
+    def get_num_rows(self, where=None, column="*") -> int:
+        query = SQLQuery()
+        query.select(self.get_table(), f"COUNT({column}) as num_rows")
+        query.where_simple(where)
+        sql = query.get_query()
+
+        cursor = self.execute(sql, query.placeholder_values)
+        result = cursor.fetchone()
+        cursor.close()
+        return result["num_rows"]
 
     def fetchone(self, columns='*', where=None, order_by=None, limit=None, placeholder_values: tuple = None) -> dict:
         query = SQLQuery()
@@ -133,8 +158,8 @@ class MySQLObject:
         insert_sql = query.insert(table, values).get_query()
         values = query.get_placeholder_values()
 
-        self.execute(insert_sql, values)
-        self.connection.commit()
+        self.execute_commit(insert_sql, values)
+
 
     def update(self, values: dict, where: str, placeholder_values: tuple = None) -> None:
         table = self.get_table()
@@ -143,8 +168,7 @@ class MySQLObject:
         update_sql = query.update(table, values).where(where).get_query()
         values = query.get_placeholder_values() + placeholder_values
 
-        self.execute(update_sql, values)
-        self.connection.commit()
+        self.execute_commit(update_sql, values)
 
     def update_simple(self, values: dict, where: dict) -> None:
         """ 
@@ -158,11 +182,9 @@ class MySQLObject:
         update_sql = query.get_query()
         placeholder_values = query.get_placeholder_values()
 
-        self.execute(update_sql, placeholder_values)
-        self.connection.commit()
+        self.execute_commit(update_sql, placeholder_values)
 
     def replace(self, values: dict, where: dict) -> None:
-        
 
         row = self.fetchone_simple(where=where)
         if row:
@@ -173,16 +195,15 @@ class MySQLObject:
     def delete(self, where: str, placeholder_values: tuple) -> None:
         table = self.get_table()
         delete_sql = SQLQuery().delete(table).where(where).get_query()
-        self.execute(delete_sql, placeholder_values)
-        self.connection.commit()
+        self.execute_commit(delete_sql, placeholder_values)
 
     def delete_simple(self, where: dict) -> None:
         table = self.get_table()
         query = SQLQuery()
         delete_sql = query.delete(table).where_simple(where).get_query()
         placeholder_values = query.get_placeholder_values()
-        self.execute(delete_sql, placeholder_values)
-        self.connection.commit()
+
+        self.execute_commit(delete_sql, placeholder_values)
 
 
 def get_mysql_object(*kargs, **kwargs) -> MySQLObject:

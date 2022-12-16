@@ -3,6 +3,6 @@ settings = {
         "host": "localhost",
         "user": "root",
         "password": "password",
-        "database": "mysql_object"
+        "database": "mysql_object",
     },
 }

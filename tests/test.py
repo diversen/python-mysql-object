@@ -2,6 +2,7 @@ import unittest
 from tests.settings import settings
 from mysql_object import SQLQuery
 from mysql_object import MySQLObject, get_mysql_object
+from mysql.connector import connect, cursor, Error
 import sys
 sys.path.append(".")
 
@@ -166,8 +167,50 @@ class TestMySQLObject(unittest.TestCase):
         rows = mysql_object.fetchall_simple(where={"title": "replace test inserted"})
         self.assertEqual(len(rows), 1)
 
-        
+    def test_in_transaction_execute(self):
 
+
+        mysql_object = get_object("tests")
+
+        def test_function():
+            mysql_object.insert(values={"title": "transaction test"})
+            mysql_object.insert(values={"title": "transaction test"})
+            mysql_object.insert(values={"unknown_column_causing_exception": "transaction test"})
+
+        try:
+            self.assertRaises(Error, mysql_object.in_transaction_execute(test_function))
+        except Error as e:
+            # Unknown column 'unknown_column_causing_exception' in 'field list'
+            self.assertEqual(e.args[0], 1054)
+
+
+        num_rows = mysql_object.get_num_rows({"title": "transaction test"}, "*")
+        self.assertEqual(num_rows, 0)
+
+        def test_function_working():
+            mysql_object.insert(values={"title": "transaction test"})
+            mysql_object.insert(values={"title": "transaction test"})
+            mysql_object.insert(values={"title": "transaction test"})
+
+        mysql_object.in_transaction_execute(test_function_working)
+        num_rows = mysql_object.get_num_rows({"title": "transaction test"})
+        self.assertEqual(num_rows, 3)
+
+        mysql_object.delete_simple(where={"title": "transaction test"})
+
+        
+    def test_get_num_rows(self):
+
+        mysql_object = get_object("tests")
+
+        mysql_object.insert(values={"title": "test"})
+        mysql_object.insert(values={"title": "test"})
+
+
+        num_rows = mysql_object.get_num_rows(where={"title": "test"})
+        self.assertEqual(num_rows, 2)
+
+        mysql_object.delete_simple(where={"title": "test"})
 
 
     def test_sql_query(self):
@@ -193,6 +236,8 @@ class TestMySQLObject(unittest.TestCase):
 
         self.assertEqual(
             sql, "SELECT * FROM `tests` WHERE title = %s OR title = %s ORDER BY `title` ASC LIMIT 30, 10")
+
+
 
 
 if __name__ == '__main__':
