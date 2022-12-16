@@ -1,3 +1,4 @@
+from mysql.connector import Error
 from mysql_object import MySQLObject, get_mysql_object
 from mysql_object import SQLQuery
 from tests.settings import settings
@@ -57,3 +58,39 @@ mysql_object.fetchall_query(query, placeholder_values=("test",))
 
 mysql_object.delete_simple(where={"title": "new test"})
 mysql_object.delete_simple(where={"title": "test 2"})
+
+# Execute in a single transaction
+
+def test_function():
+    mysql_object.insert(values={"title": "transaction test"})
+    mysql_object.insert(values={"title": "transaction test"})
+    mysql_object.insert(values={"unknown_column_causing_exception": "transaction test"})
+
+try:
+    mysql_object.in_transaction_execute(test_function)
+except Error as e:
+    pass
+    # Unknown column 'unknown_column_causing_exception' in 'field list'
+    # print(e)
+
+# Get num rows
+num_rows = mysql_object.get_num_rows(where={"title": "transaction test"}, column="*")
+print(num_rows) # -> 0
+
+def test_function_working():
+    mysql_object.insert(values={"title": "transaction test"})
+    mysql_object.insert(values={"title": "transaction test"})
+
+try:
+    mysql_object.in_transaction_execute(test_function_working)
+except Error as e:
+    pass
+    # Unknown column 'unknown_column_causing_exception' in 'field list'
+    # print(e)
+
+num_rows = mysql_object.get_num_rows(where={"title": "transaction test"}, column="*")
+print(num_rows) # -> 2
+
+mysql_object.delete_simple(where={"title": "transaction test"})
+
+

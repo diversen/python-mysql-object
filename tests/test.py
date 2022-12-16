@@ -83,7 +83,7 @@ class TestMySQLObject(unittest.TestCase):
             where="title = %s", placeholder_values=("new test",))
         self.assertEqual(result["title"], "new test")
 
-        mysql_object.delete(where="title = %s", placeholder_values=("test",))
+        mysql_object.delete(where="title = %s", placeholder_values=("new test",))
 
     def test_update_simple(self):
 
@@ -96,7 +96,7 @@ class TestMySQLObject(unittest.TestCase):
             where="title = %s", placeholder_values=("new test",))
         self.assertEqual(result["title"], "new test")
 
-        mysql_object.delete(where="title = %s", placeholder_values=("test",))
+        mysql_object.delete(where="title = %s", placeholder_values=("new test",))
 
     def test_insert_id(self):
         mysql_object = get_object("tests")
@@ -146,8 +146,7 @@ class TestMySQLObject(unittest.TestCase):
     def test_replace(self):
         mysql_object = get_object("tests")
 
-        mysql_object.delete_simple(where={"title": "replace test updated"})
-        mysql_object.delete_simple(where={"title": "replace test inserted"})
+        
 
         mysql_object.insert(values={"title": "replace test"})
         mysql_object.insert(values={"title": "replace test"})
@@ -166,6 +165,9 @@ class TestMySQLObject(unittest.TestCase):
 
         rows = mysql_object.fetchall_simple(where={"title": "replace test inserted"})
         self.assertEqual(len(rows), 1)
+
+        mysql_object.delete_simple(where={"title": "replace test updated"})
+        mysql_object.delete_simple(where={"title": "replace test inserted"})
 
     def test_in_transaction_execute(self):
 
