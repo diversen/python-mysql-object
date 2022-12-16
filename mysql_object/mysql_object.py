@@ -17,6 +17,7 @@ class MySQLObject:
 
     def set_table(self, table) -> None:
         self.table = table
+        return self
 
     def get_table(self) -> str:
         if not self.table:

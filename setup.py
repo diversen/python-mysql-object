@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='mysql_object',
-    version='0.0.5',    
+    version='0.0.6',    
     description='Simple way to query MySQL',
     url='https://github.com/diversen/python-mysql-object',
     author='Dennis Iversen',
