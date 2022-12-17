@@ -125,3 +125,6 @@ print(num_rows) # -> 2
 
 # Delete the test rows
 mysql_object.delete_simple(where={"title": "transaction test"})
+
+# Close the connection
+mysql_object.close()
