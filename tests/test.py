@@ -7,16 +7,10 @@ from mysql_object import SQLQuery
 from mysql_object import MySQLObject, get_mysql_object
 from mysql.connector import connect, cursor, Error
 
-
+mysql_settings = settings["mysql"]
 
 def get_object(table) -> MySQLObject:
-    mysql_object = get_mysql_object(
-        host=settings["mysql"]["host"],
-        user=settings["mysql"]["user"],
-        password=settings["mysql"]["password"],
-        database=settings["mysql"]["database"],
-
-    )
+    mysql_object = get_mysql_object(**mysql_settings)
     mysql_object.set_table(table)
     return mysql_object
 
