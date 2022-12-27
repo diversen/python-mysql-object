@@ -1,10 +1,12 @@
+import sys
+sys.path.append(".")
+
 import unittest
 from tests.settings import settings
 from mysql_object import SQLQuery
 from mysql_object import MySQLObject, get_mysql_object
 from mysql.connector import connect, cursor, Error
-import sys
-sys.path.append(".")
+
 
 
 def get_object(table) -> MySQLObject:
